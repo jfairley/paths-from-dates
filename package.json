@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/jfairley/paths-from-dates#readme",
   "dependencies": {
-    "mediainfo": "0.0.2"
+    "mediainfo": "0.0.2",
+    "prompt": "^0.2.14",
+    "q": "^1.4.1"
   }
 }
