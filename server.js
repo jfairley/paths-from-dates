@@ -1,3 +1,5 @@
+'use strict';
+
 var mediainfo = require('mediainfo');
 var Q = require('q');
 var fs = require('fs');
@@ -28,7 +30,7 @@ validatePath(outputBaseDir);
 
 console.log('reading tree from input path', inputBaseDir);
 
-return FS.listTree(inputBaseDir)
+FS.listTree(inputBaseDir)
     .then(function (inputPaths) {
         return inputPaths.filter(function (path) {
             return !fs.statSync(path).isDirectory();
@@ -36,23 +38,24 @@ return FS.listTree(inputBaseDir)
     })
     .then(function (inputPaths) {
         return inputPaths.reduce(function (promise, inputPath) {
-            console.log(typeof inputPath, inputPath);
+            var relativeInputDir = FS.directory(FS.relativeFromDirectory(inputBaseDir, inputPath));
             return promise
                 .then(function () {
                     return Q.nfcall(mediainfo, inputPath);
                 })
                 .then(function (result) {
-                    var outputDir = outputBaseDir;
+                    result = result[0];
                     var dateString = result.File_last_modification_date;
+                    var outputDir = path.join(outputBaseDir, relativeInputDir);
                     if (dateString) {
                         var m = moment.utc(dateString);
                         if (m.isValid()) {
-                            outputDir = path.resolve(outputBaseDir, m.year(), m.month(), m.date());
+                            outputDir = path.join(outputDir, m.year(), m.month(), m.date());
                         } else {
-                            console.error('cannot read date', dateString, JSON.stringify(result));
+                            console.error('cannot read date', dateString, JSON.stringify(result, null, '  '));
                         }
                     } else {
-                        console.error('cannot find date', JSON.stringify(result));
+                        console.error('cannot find date', JSON.stringify(result, null, '  '));
                     }
                     return FS.makeTree(outputDir)
                         .then(function () {
