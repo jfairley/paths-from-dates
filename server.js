@@ -45,7 +45,13 @@ FS.listTree(inputBaseDir)
                 })
                 .then(function (result) {
                     result = result[0];
-                    var dateString = result.File_last_modification_date;
+                    var dateString;
+                    if (result.hasOwnProperty('encoded_date')) {
+                        dateString = result.encoded_date;
+                    }
+                    else if (result.hasOwnProperty('File_last_modification_date')) {
+                        dateString = result.File_last_modification_date;
+                    }
                     var outputDir = path.join(outputBaseDir, relativeInputDir);
                     if (dateString) {
                         var m = moment.utc(dateString);
