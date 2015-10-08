@@ -1,0 +1,23 @@
+{
+  "name": "paths-from-dates",
+  "version": "1.0.0",
+  "description": "copy my mislabeled files to date paths",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfairley/paths-from-dates.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jfairley/paths-from-dates/issues"
+  },
+  "homepage": "https://github.com/jfairley/paths-from-dates#readme",
+  "dependencies": {
+    "mediainfo": "0.0.2"
+  }
+}
