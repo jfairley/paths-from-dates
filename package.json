@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "copy my mislabeled files to date paths",
   "main": "server.js",
+  "engines": {
+    "node": ">=4"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -19,6 +22,7 @@
   "homepage": "https://github.com/jfairley/paths-from-dates#readme",
   "dependencies": {
     "mediainfo": "0.0.2",
+    "moment": "^2.10.6",
     "prompt": "^0.2.14",
     "q": "^1.4.1",
     "q-io": "^1.13.1"
