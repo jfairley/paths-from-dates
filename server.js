@@ -28,6 +28,12 @@ function validatePath(path) {
 validatePath(inputBaseDir);
 validatePath(outputBaseDir);
 
+var UNKNOWN_FILE_LOG = './unknown.files.log';
+
+console.log('starting log file');
+
+fs.writeFileSync(UNKNOWN_FILE_LOG, 'The following files were not copied because a date was not determined:\n');
+
 console.log('reading tree from input path', inputBaseDir);
 
 FS.listTree(inputBaseDir)
@@ -56,12 +62,15 @@ FS.listTree(inputBaseDir)
                             }
                             return date;
                         }, null);
+
                     var outputDir = path.join(outputBaseDir, relativeInputDir);
                     if (date) {
                         outputDir = path.join(outputDir, date.year(), date.month(), date.date());
                     } else {
                         console.error('cannot find date', JSON.stringify(result, null, '  '));
+                        return FS.append(UNKNOWN_FILE_LOG, inputPath + '\n');
                     }
+
                     return FS.makeTree(outputDir)
                         .then(function () {
                             return FS.base(inputPath);
