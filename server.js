@@ -45,21 +45,20 @@ FS.listTree(inputBaseDir)
                 })
                 .then(function (result) {
                     result = result[0];
-                    var dateString;
-                    if (result.hasOwnProperty('encoded_date')) {
-                        dateString = result.encoded_date;
-                    }
-                    else if (result.hasOwnProperty('File_last_modification_date')) {
-                        dateString = result.File_last_modification_date;
-                    }
+                    var date = [
+                        'encoded_date',
+                        'File_last_modification_date'
+                    ].reduce(function (date, property) {
+                            var dateString = result.hasOwnProperty(property) ? result[property] : null;
+                            var m = moment.utc(dateString);
+                            if (m.isValid()) {
+                                return date && date.isBefore(m) ? date : m;
+                            }
+                            return date;
+                        }, null);
                     var outputDir = path.join(outputBaseDir, relativeInputDir);
-                    if (dateString) {
-                        var m = moment.utc(dateString);
-                        if (m.isValid()) {
-                            outputDir = path.join(outputDir, m.year(), m.month(), m.date());
-                        } else {
-                            console.error('cannot read date', dateString, JSON.stringify(result, null, '  '));
-                        }
+                    if (date) {
+                        outputDir = path.join(outputDir, date.year(), date.month(), date.date());
                     } else {
                         console.error('cannot find date', JSON.stringify(result, null, '  '));
                     }
