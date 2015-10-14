@@ -38,11 +38,13 @@ console.log('reading tree from input path', inputBaseDir);
 
 FS.listTree(inputBaseDir)
     .then(function (inputPaths) {
+        console.log('loaded tree list');
         return inputPaths.filter(function (path) {
             return !fs.statSync(path).isDirectory();
         });
     })
     .then(function (inputPaths) {
+        console.log('filtered out directory paths');
         return inputPaths.reduce(function (promise, inputPath) {
             var relativeInputDir = FS.directory(FS.relativeFromDirectory(inputBaseDir, inputPath));
             return promise
