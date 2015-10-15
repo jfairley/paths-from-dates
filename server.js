@@ -32,16 +32,15 @@ var UNKNOWN_FILE_LOG = 'unknown.files.log';
 
 console.log('reading tree from input path', inputBaseDir);
 
-FS.listTree(inputBaseDir)
-    .then(function (inputPaths) {
-        console.log('loaded tree list');
-        return inputPaths.filter(function (path) {
-            return !fs.statSync(path).isDirectory();
-        });
-    })
-    .then(function (inputPaths) {
-        console.log('filtered out directory paths');
-        return inputPaths.reduce(function (promise, inputPath) {
+function copyFiles(inputBase, inputPaths) {
+    return inputPaths
+        .reduce(function (promise, inputPath) {
+            inputPath = path.join(inputBase, inputPath);
+            if (fs.statSync(inputPath).isDirectory()) {
+                return list(inputPath);
+            }
+
+
             var relativeInputDir = FS.directory(FS.relativeFromDirectory(inputBaseDir, inputPath));
             return promise
                 .then(function () {
@@ -85,7 +84,18 @@ FS.listTree(inputBaseDir)
                         });
                 });
         }, Q());
-    })
+}
+
+
+function list(inputDir) {
+    return FS.list(inputDir)
+        .then(function (files) {
+            return copyFiles(inputDir, files);
+        });
+}
+
+
+list(inputBaseDir)
     .then(function () {
         console.log('this is after everything');
     })
