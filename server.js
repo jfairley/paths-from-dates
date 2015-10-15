@@ -28,11 +28,7 @@ function validatePath(path) {
 validatePath(inputBaseDir);
 validatePath(outputBaseDir);
 
-var UNKNOWN_FILE_LOG = './unknown.files.log';
-
-console.log('starting log file');
-
-fs.writeFileSync(UNKNOWN_FILE_LOG, 'The following files were not copied because a date was not determined:\n');
+var UNKNOWN_FILE_LOG = 'unknown.files.log';
 
 console.log('reading tree from input path', inputBaseDir);
 
@@ -54,8 +50,12 @@ FS.listTree(inputBaseDir)
                 .then(function (result) {
                     result = result[0];
                     var date = [
+                        'Encoded_date',
                         'encoded_date',
-                        'File_last_modification_date'
+                        'Tagged_date',
+                        'tagged_date',
+                        'File_last_modification_date',
+                        'file_last_modification_date'
                     ].reduce(function (date, property) {
                             var dateString = result.hasOwnProperty(property) ? result[property] : null;
                             var m = moment.utc(dateString);
@@ -67,18 +67,17 @@ FS.listTree(inputBaseDir)
 
                     var outputDir = path.join(outputBaseDir, relativeInputDir);
                     if (date) {
-                        outputDir = path.join(outputDir, date.year(), date.month(), date.date());
+                        outputDir = path.join(outputDir, String(date.year()), String(date.month()), String(date.date()));
                     } else {
-                        console.error('cannot find date', JSON.stringify(result, null, '  '));
-                        return FS.append(UNKNOWN_FILE_LOG, inputPath + '\n');
+                        return FS.makeTree(outputDir)
+                            .then(function () {
+                                FS.append(path.resolve(outputDir, UNKNOWN_FILE_LOG), inputPath + '\n');
+                            });
                     }
 
                     return FS.makeTree(outputDir)
                         .then(function () {
-                            return FS.base(inputPath);
-                        })
-                        .then(function (inputFilename) {
-                            var outputPath = path.resolve(outputDir, inputFilename);
+                            var outputPath = path.resolve(outputDir, FS.base(inputPath));
                             return FS.copy(inputPath, outputPath)
                                 .then(function () {
                                     console.log('copied %s to %s', inputPath, outputPath);
