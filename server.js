@@ -33,6 +33,7 @@ var UNKNOWN_FILE_LOG = 'unknown.files.log';
 console.log('reading tree from input path', inputBaseDir);
 
 function copyFiles(inputBase, inputPaths) {
+    console.log('starting copy from %s', inputBase);
     return inputPaths
         .reduce(function (promise, inputPath) {
             inputPath = path.join(inputBase, inputPath);
