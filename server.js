@@ -1,6 +1,7 @@
 'use strict';
 
 var mediainfo = require('mediainfo');
+var Promise = require('bluebird');
 var Q = require('q');
 var fs = require('fs');
 var FS = require('q-io/fs');
@@ -34,8 +35,8 @@ console.log('reading tree from input path', inputBaseDir);
 
 function moveFiles(inputBase, inputPaths) {
     console.log('starting copy from %s', inputBase);
-    return inputPaths
-        .reduce(function (promise, inputPath) {
+    return Promise
+        .each(inputPaths, function (inputPath) {
             inputPath = path.join(inputBase, inputPath);
             console.log('starting stats on %s', inputPath);
             if (fs.statSync(inputPath).isDirectory()) {
@@ -44,10 +45,7 @@ function moveFiles(inputBase, inputPaths) {
 
 
             var relativeInputDir = FS.directory(FS.relativeFromDirectory(inputBaseDir, inputPath));
-            return promise
-                .then(function () {
-                    return Q.nfcall(mediainfo, inputPath);
-                })
+            return Q.nfcall(mediainfo, inputPath)
                 .then(function (result) {
                     result = result[0];
                     var date = [
@@ -58,13 +56,13 @@ function moveFiles(inputBase, inputPaths) {
                         'File_last_modification_date',
                         'file_last_modification_date'
                     ].reduce(function (date, property) {
-                            var dateString = result.hasOwnProperty(property) ? result[property] : null;
-                            var m = moment.utc(dateString);
-                            if (m.isValid()) {
-                                return date && date.isBefore(m) ? date : m;
-                            }
-                            return date;
-                        }, null);
+                        var dateString = result.hasOwnProperty(property) ? result[property] : null;
+                        var m = moment.utc(dateString);
+                        if (m.isValid()) {
+                            return date && date.isBefore(m) ? date : m;
+                        }
+                        return date;
+                    }, null);
 
                     var outputDir = path.join(outputBaseDir, relativeInputDir);
                     if (date) {
@@ -85,7 +83,7 @@ function moveFiles(inputBase, inputPaths) {
                                 });
                         });
                 });
-        }, Q());
+        });
 }
 
 
