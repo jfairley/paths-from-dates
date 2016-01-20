@@ -32,11 +32,12 @@ var UNKNOWN_FILE_LOG = 'unknown.files.log';
 
 console.log('reading tree from input path', inputBaseDir);
 
-function copyFiles(inputBase, inputPaths) {
+function moveFiles(inputBase, inputPaths) {
     console.log('starting copy from %s', inputBase);
     return inputPaths
         .reduce(function (promise, inputPath) {
             inputPath = path.join(inputBase, inputPath);
+            console.log('starting stats on %s', inputPath);
             if (fs.statSync(inputPath).isDirectory()) {
                 return list(inputPath);
             }
@@ -71,16 +72,16 @@ function copyFiles(inputBase, inputPaths) {
                     } else {
                         return FS.makeTree(outputDir)
                             .then(function () {
-                                FS.append(path.resolve(outputDir, UNKNOWN_FILE_LOG), inputPath + '\n');
+                                return FS.append(path.resolve(outputDir, UNKNOWN_FILE_LOG), inputPath + '\n');
                             });
                     }
 
                     return FS.makeTree(outputDir)
                         .then(function () {
                             var outputPath = path.resolve(outputDir, FS.base(inputPath));
-                            return FS.copy(inputPath, outputPath)
+                            return FS.move(inputPath, outputPath)
                                 .then(function () {
-                                    console.log('copied %s to %s', inputPath, outputPath);
+                                    console.log('moved %s to %s', inputPath, outputPath);
                                 });
                         });
                 });
@@ -91,7 +92,7 @@ function copyFiles(inputBase, inputPaths) {
 function list(inputDir) {
     return FS.list(inputDir)
         .then(function (files) {
-            return copyFiles(inputDir, files);
+            return moveFiles(inputDir, files);
         });
 }
 
